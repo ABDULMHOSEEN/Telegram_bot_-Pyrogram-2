@@ -26,14 +26,11 @@ def start(self, message):
     message.reply("Hi! \n The bot is running")
 
 
-@bot.on_chat_member_updated()
+@bot.on_chat_member_updated(filters.new_chat_members)
 def new_person(self, message):
-    try:
-        x = message['new_chat_member']['user']['id']
-        chat_id = message['chat']['id']
-        self.send_message(chat_id, "أهلا وسهلا نورت القروب")
-    except:
-        print("pop")
+    chat_id = message['chat']['id']
+    self.send_message(chat_id, "أهلا وسهلا نورت القروب")
+
 
 # define the help command
 @bot.on_message(filters.command("help"))
