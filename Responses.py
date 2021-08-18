@@ -4,6 +4,7 @@ from urllib import request
 import json
 import profile as personal_info
 
+
 ### ---------------------------------------------------
 def jokesFunction():
     # for joke
@@ -14,7 +15,6 @@ def jokesFunction():
     # read the data init
     data = r.read()
     json_data = json.loads(data)
-
 
     # define a class
     class Joke:
@@ -27,13 +27,14 @@ def jokesFunction():
         def __str__(self) -> str:
             return f" {self.setup}, {self.punchline}"
 
-
     # pass data inside the class
     setup = json_data["setup"]
     punchline = json_data["punchline"]
     joke = Joke(setup, punchline)
     return str(joke)
-    ### ----------------------------------------------
+### ----------------------------------------------
+
+
 def AI_Response():
     url = "https://api.pgamerx.com/v4/:plan/ai"
 
@@ -41,10 +42,11 @@ def AI_Response():
 # define a function that take input from user and return some strings
 def sample_responses(input_text):
     user_message = str(input_text).lower()
+    user_message_no_change = str(input_text)
 
     hello_word = ("hello", "hi", "?!", "?")
     for word in hello_word:
-        if word in user_message:
+        if word == user_message:
             return "Hi? did you call me??"
 
     who_word = ("who are you", "who is you", "who")
@@ -70,20 +72,22 @@ def sample_responses(input_text):
             return jokesFunction()
 
 
-    if user_message == "باسم":
-        return "وع"
-
-    if user_message == "الشيطان":
-        return "قصدك باسم؟"
-
-    if user_message == "حيدر":
-        return "مايحتاج رد"
-
-    if user_message.split()[0] == "/profile":
-        text = user_message.split()
-        profile = personal_info.sample_responses(text)
-        return profile
-
 
     else:
-        pass
+        # TAKE ALL The info and make it as a dictionary
+        dictionary = {}
+        target = None
+        # open the file
+        input_file = open("archives.txt", "r")
+        # read info
+        lines = input_file.readlines()
+        input_file.close()
+        for line in lines:
+            line = line.split(":")
+            dictionary[line[0]] = line[1].rstrip("\n")
+            if user_message in line[0].lower():
+                target = line[0]
+        if target is not None:
+            return dictionary[target]
+        else:
+            return None
