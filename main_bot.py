@@ -26,16 +26,15 @@ def start(self, message):
     message.reply("Hi! \n The bot is running")
 
 
-@bot.on_chat_member_updated(filters.new_chat_members)
+@bot.on_message(filters.new_chat_members)
 def new_person(self, message):
     chat_id = message['chat']['id']
     self.send_message(chat_id, "أهلا وسهلا نورت القروب")
 
 
 # define the help command
-@bot.on_message(filters.command("help"))
-@bot.on_message(filters.command("help@ABDULMOHSEEN_2_bot"))
-def help(self, message):
+@bot.on_message(filters.command(["help", "help@ABDULMOHSEEN_2_bot"]))
+def help_message(self, message):
     # print the list of Tasks
     message.reply("/start - Check if the bot is running\n\n"
                   "/my_ID - Get your id number\n\n"
@@ -47,8 +46,8 @@ def help(self, message):
                   )
 
 
-@bot.on_message(filters.command("Ans"))
-@bot.on_message(filters.command("Ans@ABDULMOHSEEN_2_bot"))
+# define a response message to show all responses
+@bot.on_message(filters.command(["Ans", "Ans@ABDULMOHSEEN_2_bot"]))
 def response(self, message):
     # TAKE ALL The info and make it as a dictionary
     dictionary = {}
@@ -73,9 +72,8 @@ def response(self, message):
     message.reply(response_local)
 
 
-# define an ID command
-@bot.on_message(filters.command("my_ID"))
-@bot.on_message(filters.command("my_ID@ABDULMOHSEEN_2_bot"))
+# define an ID command to get the user id
+@bot.on_message(filters.command(["my_ID", "my_ID@ABDULMOHSEEN_2_bot"]))
 def id_reply(self, message):
     if message.from_user.username is not None:
         message.reply(f"The person who's username is @{message.from_user.username} his ID is: {message.from_user.id}")
@@ -134,9 +132,8 @@ def profile(self, message):
     message.reply(profile)
 
 
-# define archives
-@bot.on_message(filters.command("addR"))
-@bot.on_message(filters.command("addR@ABDULMOHSEEN_2_bot"))
+# define archives to add a new responses
+@bot.on_message(filters.command(["addR", "addR@ABDULMOHSEEN_2_bot"]))
 def archives(self, message):
 
 # if message.from_user.id == BOSS_ID:
@@ -179,8 +176,7 @@ def archives(self, message):
 
 
 # this is a command to print the profile form
-@bot.on_message(filters.command("profile_form"))
-@bot.on_message(filters.command("profile_form@ABDULMOHSEEN_2_bot"))
+@bot.on_message(filters.command(["profile_form", "profile_form@ABDULMOHSEEN_2_bot"]))
 def profile_form(self, message):
     message.reply("This is the form for profile\n"
                   "\n###########\n"
@@ -197,8 +193,8 @@ def profile_form(self, message):
                   "2020\n")
 
 
-@bot.on_message(filters.command("response_form@ABDULMOHSEEN_2_bot"))
-@bot.on_message(filters.command("response_form"))
+# define a function that give the form to add a new response
+@bot.on_message(filters.command(["response_form", "response_form@ABDULMOHSEEN_2_bot"]))
 def response_form(self, message):
     message.reply("This is the correct form to make a new response\n\n"
                   "/addR\n"
