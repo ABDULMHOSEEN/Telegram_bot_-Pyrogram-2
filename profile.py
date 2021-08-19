@@ -30,7 +30,7 @@ def sample_responses(input_text, user_id):
             text = "ID = {},Name = {},Master = {},Year = {}\n".format(user_id, user_message[0],
                                                                          user_message[1].upper(), user_message[2])
             output_file.write(str(text))
-            return "Done successfully"
+            return "✅ Done successfully"
     else:
         return "You have to send the message using the /profile_form"
 

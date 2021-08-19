@@ -10,6 +10,8 @@ Password = open("PassWord.txt", "r")
 api_id = Password.readline().split()[1]
 api_hash = Password.readline().split()[1]
 
+# Define the bot id
+BOT_ID = 1779607655
 # Make a boss id which is mine
 BOSS_ID_1 = 477758182
 BOSS_ID_2 = 896399150
@@ -160,11 +162,11 @@ def archives(self, message):
         check = True
         # check if the key is existing
         for key, value in dictionary.items():
-            if key in text[0]:
+            if key.lower() in text[0].lower():
                 # if it is existing make check to false
                 check = False
                 message.reply("The key is already exiting")
-
+                break
         if check:
             input_file = open("archives.txt", "a")
             # make the text as a dictionary and write it
@@ -215,24 +217,6 @@ def readMessage(self, message):
     message.reply(message)
 
 
-# this function for all other messages
-
-def talk(self, message):
-    if message.text is not None:
-        text = message["text"]
-        if text.lower() == "block":
-            block(self, message)
-        elif text.lower() == "make boss":
-            make_boss(self, message)
-        else:
-            response = responses.sample_responses(text)
-            if response is None:
-                pass
-            else:
-                message.reply(response)
-    else:
-        pass
-
 
 # for block the user
 def block(self, message):
@@ -251,8 +235,12 @@ def block(self, message):
         try:
             chat_id = message.chat.id
             user_id = message.reply_to_message.from_user.id
-            self.kick_chat_member(chat_id, user_id)
-            self.send_message(chat_id, "The person who is named @{} has been kicked".format(message.reply_to_message.from_user.username))
+            if user_id == BOT_ID:
+                message.reply("You try to kick me?")
+                self.kick_chat_member(chat_id, message.from_user.id)
+            else:
+                self.kick_chat_member(chat_id, user_id)
+                self.send_message(chat_id, "The person who is named @{} has been kicked".format(message.reply_to_message.from_user.username))
         except:
             message.reply("You must mention someone-kick")
     else:
@@ -295,7 +283,68 @@ def make_boss(self, message):
         message.reply("Just Big Boss can do it")
 
 
-bot.add_handler(MessageHandler(talk))
+# this function for all other messages
+
+def global_handler(self, message):
+    if message.text is not None:
+        text = message["text"]
+
+        # to show the help message
+        if text.lower() == "المهام":
+            help_message(self, message)
+
+        # get all of the responses keys
+        elif text.lower() == "الردود":
+            get_the_response(self, message)
+
+        # get the id for some one
+        elif text.lower() == "كشف":
+            get_id(self, message)
+
+        # make a profile
+        elif text.split("\n")[0] == "ملف تعريفي":
+            profile(self, message)
+
+        # get a profile for someone
+        elif text.split("\n")[0] == "معلومات":
+            get_profile(self, message)
+
+        # add a response
+        elif text.split("\n")[0] == "اضافة رد" or text.split("\n")[0] == "اضافه رد" or text.split("\n")[0] == "اضف رد":
+            archives(self, message)
+
+        # get the profile form
+        elif text.lower() == "صيغة الملف التعريفي" or text.lower == "صيغة ملف تعريفي":
+            profile_form(self, message)
+
+        # get the add response form
+        elif text.lower() == "صيغة اضافة رد" or text.lower == "صيغة اضافة الرد":
+            response_form(self, message)
+
+        # make a user as a boss
+        elif text.lower() == "رفع مدير":
+            make_boss(self, message)
+
+        # block user
+        elif text.lower() == "طرد":
+            block(self, message)
+
+
+        else:
+            response = responses.sample_responses(text)
+            if response is None:
+                pass
+            else:
+                message.reply(response)
+    else:
+        pass
+
+
+bot.add_handler(MessageHandler(global_handler))
+
+
+
+
 
 # define a code that print username of sender and his message
 # @bot.on_message()

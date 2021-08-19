@@ -83,11 +83,13 @@ def sample_responses(input_text):
         lines = input_file.readlines()
         input_file.close()
         for line in lines:
-            line = line.split(":")
-            dictionary[line[0]] = line[1].rstrip("\n")
-            if user_message == line[0].lower():
-                target = line[0]
+            line = line.split("*")
+            if len(line) == 2:
+                dictionary[line[0]] = line[1].rstrip("\n")
+                if user_message == line[0].lower():
+                    target = line[0]
         if target is not None:
             return dictionary[target]
         else:
             return None
+
