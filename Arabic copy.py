@@ -139,7 +139,6 @@ def profile(self, message):
 # define archives to add a new responses
 @bot.on_message(filters.command(["addR", "addR@ABDULMOHSEEN_2_bot"]))
 def archives(self, message):
-
 # if message.from_user.id == BOSS_ID:
     # take the text
     text = message.text
@@ -149,34 +148,52 @@ def archives(self, message):
     text.pop(0)
     # check the len
     if len(text) == 2:
-        # TAKE ALL The info and make it as a dictionary
-        dictionary = {}
-        # open the file
-        input_file = open("archives.txt", "r")
-        # read info
-        lines = input_file.readlines()
-        input_file.close()
-        for line in lines:
-            line = line.split("*")
-            dictionary[line[0]] = line[1].rstrip("\n")
-        check = True
-        # check if the key is existing
-        for key, value in dictionary.items():
-            if key.lower() in text[0].lower():
-                # if it is existing make check to false
-                check = False
-                message.reply("The key is already exiting")
-                break
-        if check:
+        # check the key
+        check = check_archives(text[0])
+        if not check:
             input_file = open("archives.txt", "a")
             # make the text as a dictionary and write it
             dictionary = "{}*{}\n".format(text[0], text[1])
             input_file.write(str(dictionary))
             message.reply("تمت اضافة الرد")
+        else:
+            message.reply("The key is already exiting")
     else:
         message.reply("You have to write in the specific form (/response_form)")
 # else:
 # message.reply("Just the Boss can do it")
+
+
+# make a function to delete a response
+@bot.on_message((filters.command(["deleteR", "deleteR@ABDULMOHSEEN_2_bot"])))
+def delete_response(self, message):
+    # get the message text
+    text = message.text
+    # split by line
+    text = text.split("\n")
+    # pop the command word
+    text.pop(0)
+    check = check_archives(text[0])
+    if check:
+        input_file = open("archives.txt", "r")
+        # read info
+        lines = input_file.readlines()
+        input_file.close()
+        dictionary = {}
+        for line in lines:
+            line = line.split("*")
+            dictionary[line[0]] = line[1].rstrip("\n")
+        for key, value in dictionary.items():
+            if key.lower() == text[0].lower():
+                dictionary.pop(key)
+                break
+        input_file = open("archives.txt", "w")
+        for key, value in dictionary.items():
+            target = "{}*{}\n".format(key,value)
+            input_file.write(str(target))
+        message.reply("تم حذف الرد")
+    else:
+        message.reply("Not Found")
 
 
 # this is a command to print the profile form
@@ -313,6 +330,10 @@ def global_handler(self, message):
         elif text.split("\n")[0] == "اضافة رد" or text.split("\n")[0] == "اضافه رد" or text.split("\n")[0] == "اضف رد":
             archives(self, message)
 
+        # delete a response
+        elif text.split("\n")[0] == "حذف رد":
+            delete_response(self, message)
+
         # get the profile form
         elif text.lower() == "صيغة الملف التعريفي" or text.lower == "صيغة ملف تعريفي":
             profile_form(self, message)
@@ -338,6 +359,30 @@ def global_handler(self, message):
                 message.reply(response)
     else:
         pass
+
+
+# function that will check a word in dictionary
+def check_archives(message):
+    dictionary = {}
+    # open the file
+    input_file = open("archives.txt", "r")
+    # read info
+    lines = input_file.readlines()
+    input_file.close()
+    for line in lines:
+        line = line.split("*")
+        dictionary[line[0]] = line[1].rstrip("\n")
+    # check if the key is existing
+    for key, value in dictionary.items():
+        if key.lower() == message.lower():
+            # if it is existing make check to false
+            return True
+
+
+
+
+
+
 
 
 bot.add_handler(MessageHandler(global_handler))
