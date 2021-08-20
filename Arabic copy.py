@@ -106,7 +106,6 @@ def get_profile(self, message):
     text = str(message["text"]).split()
     text.pop(0)
     name = str(text[0]).lower()
-
     # take the information from the output file
     information = personal_info.read_info()
     # check which line to print
@@ -126,6 +125,8 @@ def get_profile(self, message):
     if check:
         # if the name is not found print this
         message.reply("Not Found")
+
+
 
 
 @bot.on_message(filters.command("profile"))
@@ -167,34 +168,58 @@ def archives(self, message):
 # make a function to delete a response
 @bot.on_message((filters.command(["deleteR", "deleteR@ABDULMOHSEEN_2_bot"])))
 def delete_response(self, message):
-    # get the message text
-    text = message.text
-    # split by line
-    text = text.split("\n")
-    # pop the command word
-    text.pop(0)
-    check = check_archives(text[0])
+    check = check_boss(message.from_user.id)
+    chat_id = message.chat.id
     if check:
-        input_file = open("archives.txt", "r")
-        # read info
-        lines = input_file.readlines()
-        input_file.close()
-        dictionary = {}
-        for line in lines:
-            line = line.split("*")
-            dictionary[line[0]] = line[1].rstrip("\n")
-        for key, value in dictionary.items():
-            if key.lower() == text[0].lower():
-                dictionary.pop(key)
-                break
-        input_file = open("archives.txt", "w")
-        for key, value in dictionary.items():
-            target = "{}*{}\n".format(key,value)
-            input_file.write(str(target))
-        message.reply("تم حذف الرد")
+        # get the message text
+        text = message.text
+        # split by line
+        text = text.split("\n")
+        # pop the command word
+        text.pop(0)
+        check = check_archives(text[0])
+        if check:
+            input_file = open("archives.txt", "r")
+            # read info
+            lines = input_file.readlines()
+            input_file.close()
+            dictionary = {}
+            for line in lines:
+                line = line.split("*")
+                dictionary[line[0]] = line[1].rstrip("\n")
+            for key, value in dictionary.items():
+                if key.lower() == text[0].lower():
+                    dictionary.pop(key)
+                    break
+            input_file = open("archives.txt", "w")
+            for key, value in dictionary.items():
+                target = "{}*{}\n".format(key,value)
+                input_file.write(str(target))
+            message.reply("تم حذف الرد")
+        else:
+            message.reply("Not Found")
     else:
-        message.reply("Not Found")
+        message.reply("Just the boss can do it")
 
+
+@bot.on_message(filters.command("pin"))
+def pin_message(self, message):
+    chat_id = message.chat.id
+    message_id = message.reply_to_message.message_id
+    self.pin_chat_message(chat_id, message_id)
+
+
+@bot.on_message(filters.command("Unpin"))
+def unpin_message(self, message):
+    chat_id = message.chat.id
+    message_id = message.reply_to_message.message_id
+    self.unpin_chat_message(chat_id, message_id)
+
+
+def edit_bot_message(self, message):
+    chat_id = message.chat.id
+    message_id = message.reply_to_message.message_id
+    self.edit_message_text(chat_id, message_id, text="Sorry")
 
 # this is a command to print the profile form
 @bot.on_message(filters.command(["profile_form", "profile_form@ABDULMOHSEEN_2_bot"]))
@@ -238,15 +263,7 @@ def readMessage(self, message):
 # for block the user
 def block(self, message):
     # let the boss do this order
-    input_file = open("Boss.txt", "r")
-    boss_id = input_file.readlines()
-    input_file.close()
-    check = False
-    # check if the is of the user is existing or not
-    for id_file in boss_id:
-        id_file = id_file.rstrip("\n")
-        if int(message.from_user.id) == int(id_file):
-            check = True
+    check = check_boss(message.from_user.id)
     if check:
         # take the user id and chat id
         try:
@@ -256,8 +273,12 @@ def block(self, message):
                 message.reply("You try to kick me?")
                 self.kick_chat_member(chat_id, message.from_user.id)
             else:
-                self.kick_chat_member(chat_id, user_id)
-                self.send_message(chat_id, "The person who is named @{} has been kicked".format(message.reply_to_message.from_user.username))
+                if message.reply_to_message.from_user.username is not None:
+                    self.send_message(chat_id, "The person who is named @{} has been kicked".format(message.reply_to_message.from_user.username))
+                    self.kick_chat_member(chat_id, user_id)
+                else:
+                    self.send_message(chat_id, "The person who is named {} has been kicked".format(message.reply_to_message.from_user.mention()))
+                    self.kick_chat_member(chat_id, user_id)
         except:
             message.reply("You must mention someone-kick")
     else:
@@ -335,11 +356,11 @@ def global_handler(self, message):
             delete_response(self, message)
 
         # get the profile form
-        elif text.lower() == "صيغة الملف التعريفي" or text.lower == "صيغة ملف تعريفي":
+        elif text.lower() == "صيغة الملف التعريفي" or text.lower() == "صيغة ملف تعريفي":
             profile_form(self, message)
 
         # get the add response form
-        elif text.lower() == "صيغة اضافة رد" or text.lower == "صيغة اضافة الرد":
+        elif text.lower() == "صيغة اضافة رد" or text.lower() == "صيغة اضافة الرد":
             response_form(self, message)
 
         # make a user as a boss
@@ -347,9 +368,20 @@ def global_handler(self, message):
             make_boss(self, message)
 
         # block user
-        elif text.lower() == "طرد":
+        elif text.lower() == "طرد" or text.lower() == "حظر":
             block(self, message)
 
+        # pin a message
+        elif text == "تثبيت" or text == "ثبت":
+            pin_message(self, message)
+
+        # pin a message
+        elif text == "الغاء تثبيت" or text == "إلغاء تثبيت":
+            unpin_message(self, message)
+
+        #
+        elif text == "عيب":
+            edit_bot_message(self, message)
 
         else:
             response = responses.sample_responses(text)
@@ -379,7 +411,15 @@ def check_archives(message):
             return True
 
 
-
+def check_boss(user_id):
+    input_file = open("Boss.txt", "r")
+    boss_id = input_file.readlines()
+    input_file.close()
+    # check if the is of the user is existing or not
+    for id_file in boss_id:
+        id_file = id_file.rstrip("\n")
+        if int(user_id) == int(id_file):
+            return True
 
 
 
