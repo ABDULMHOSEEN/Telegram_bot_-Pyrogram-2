@@ -1,0 +1,8 @@
+ID = 931698529,Name = taha,Major = CIE,Year = 2020
+ID = 5430075,Name = mohammadkh,Major = SWE,Year = 2019
+ID = 894399324,Name = ⁄»œ«·⁄“Ì“,Major = ME,Year = 2020
+ID = 859977045,Name = MAITHAM,Major = CHeEYear = 2020
+ID = 680741594,Name = mohammed_alessi,Major = CS,Year = 2019
+ID = 1037250504,Name = Hussain,Major = CHEM,Year = 2020
+ID = 896399150,Name = Ahmed,Master = SWE,Year = 2020
+ID = 477758182,Name = ⁄»œ«·„Õ”‰,Master = ”ÊÌ,Year = 2020
