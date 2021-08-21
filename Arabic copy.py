@@ -20,7 +20,7 @@ BOSS_ID_1 = 477758182
 BOSS_ID_2 = 896399150
 
 # Make a client named Bot
-bot = Client("Bot", api_id, api_hash)
+bot = Client("Bot_2", api_id, api_hash)
 
 
 # define a start command
@@ -305,6 +305,31 @@ def make_boss(self, message):
         message.reply("🚫 Just Big Boss can do it")
 
 
+def delete_message(self, message):
+    user_id = message.from_user.id
+    if check_boss(user_id):
+        try:
+            num = message.text.split()
+            num = num[1]
+
+            chat_id = message.chat.id
+            message_id = message.message_id
+            for times in range(int(num) + 1):
+                self.delete_messages(chat_id=chat_id,message_ids=message_id)
+                message_id -= 1
+        except IndexError:
+            message_id = message.reply_to_message.message_id
+            chat_id = message.chat.id
+            self.delete_messages(chat_id=chat_id, message_ids=message_id)
+            self.delete_messages(chat_id=chat_id, message_ids=message.message_id)
+        except TypeError:
+            message.reply("ادخل عدد وليس احرف او رموز")
+        except:
+            message.reply("حدث خطأ أثناء حذف الرسائل")
+    else:
+        message.reply("🚫 Just The Boss can do it")
+
+
 # this function for all other messages
 
 def global_handler(self, message):
@@ -367,6 +392,9 @@ def global_handler(self, message):
         #
         elif text == "عيب":
             edit_bot_message(self, message)
+
+        elif text.split()[0] == "حذف" or text.split()[0] == "مسح":
+            delete_message(self, message)
 
 
         else:
