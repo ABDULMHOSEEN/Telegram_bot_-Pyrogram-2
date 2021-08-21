@@ -1,6 +1,8 @@
 # import the libraries
 from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
+import json
+import os
 # Responses file is a file that have some handleMessage
 import Responses as responses
 import profile as personal_info
@@ -9,6 +11,7 @@ import profile as personal_info
 Password = open("PassWord.txt", "r")
 api_id = Password.readline().split()[1]
 api_hash = Password.readline().split()[1]
+Password.close()
 
 # Define the bot id
 BOT_ID = 1779607655
@@ -52,15 +55,11 @@ def help_message(self, message):
 def get_the_response(self, message):
     # TAKE ALL The info and make it as a list than print the key of the list
     response_local = []
-    # open the file
-    input_file = open("archives.txt", "r")
     # read info
-    lines = input_file.readlines()
-    input_file.close()
+    lines = read_json_file("archives.json")
     counter = 1
-    for line in lines:
-        line = line.split("*")
-        target = "{}- ".format(counter) + line[0]
+    for line in lines.keys():
+        target = "{}- ".format(counter) + line
         response_local.append(target)
         counter += 1
         # change the format
@@ -102,44 +101,47 @@ def get_id(self, message):
 # this function is for take the information from the profile
 @bot.on_message(filters.command("info"))
 def get_profile(self, message):
-    # take the name from the user and split it to make it just a single name
-    text = str(message["text"]).split()
-    text.pop(0)
-    name = str(text[0]).lower()
-    # take the information from the output file
-    information = personal_info.read_info()
-    # check which line to print
-    check = True
-    for line in information:
-        # take each line in the information nad make it in the correct form
-        line = line.split(",")
-        if name in line[1].lower():
-            sol = str(line).replace(",", "\n")
-            sol = sol.replace("[", "")
-            sol = sol.replace("]", "")
-            sol = sol.replace("'", "")
-            sol = sol.rstrip("\ n")
-            # finally print it
-            check = False
-            message.reply(sol)
-    if check:
-        # if the name is not found print this
-        message.reply("Not Found")
-
-
+    on_off = False
+    if on_off:
+        # take the name from the user and split it to make it just a single name
+        text = str(message["text"]).split()
+        text.pop(0)
+        name = str(text[0]).lower()
+        # take the information from the output file
+        information = personal_info.read_info()
+        # check which line to print
+        check = True
+        for line in information:
+            # take each line in the information nad make it in the correct form
+            line = line.split(",")
+            if name in line[1].lower():
+                sol = str(line).replace(",", "\n")
+                sol = sol.replace("[", "")
+                sol = sol.replace("]", "")
+                sol = sol.replace("'", "")
+                sol = sol.rstrip("\ n")
+                # finally print it
+                check = False
+                message.reply(sol)
+        if check:
+            # if the name is not found print this
+            message.reply("Not Found")
+    message.reply("نأسف تم تعطيل هذه الخاصية")
 
 
 @bot.on_message(filters.command("profile"))
 def profile(self, message):
-    text = message.text.split("\n")
-    user_id = message.from_user.id
-    profile = personal_info.sample_responses(text, user_id)
-    message.reply(profile)
+    #text = message.text.split("\n")
+    #user_id = message.from_user.id
+    #profile = personal_info.sample_responses(text, user_id)
+    #message.reply(profile)
+    message.reply("نأسف تم تعطيل هذه الخاصية")
 
 
 # define archives to add a new responses
 @bot.on_message(filters.command(["addR", "addR@ABDULMOHSEEN_2_bot"]))
 def archives(self, message):
+
 # if message.from_user.id == BOSS_ID:
     # take the text
     text = message.text
@@ -152,11 +154,12 @@ def archives(self, message):
         # check the key
         check = check_archives(text[0])
         if not check:
-            input_file = open("archives.txt", "a")
-            # make the text as a dictionary and write it
-            dictionary = "{}*{}\n".format(text[0], text[1])
-            input_file.write(str(dictionary))
-            message.reply("تمت اضافة الرد")
+            input_file: dict = read_json_file("archives.json")
+            input_file[text[0]] = text[1]
+            open_data = open("archives.json", "w")
+            json.dump(input_file, open_data, indent=2)
+            open_data.close()
+            message.reply("✔️ تمت اضافة الرد")
         else:
             message.reply("The key is already exiting")
     else:
@@ -179,23 +182,16 @@ def delete_response(self, message):
         text.pop(0)
         check = check_archives(text[0])
         if check:
-            input_file = open("archives.txt", "r")
-            # read info
-            lines = input_file.readlines()
-            input_file.close()
-            dictionary = {}
-            for line in lines:
-                line = line.split("*")
-                dictionary[line[0]] = line[1].rstrip("\n")
-            for key, value in dictionary.items():
+            lines = read_json_file("archives.json")
+            for key, value in lines.items():
                 if key.lower() == text[0].lower():
-                    dictionary.pop(key)
+                    lines.pop(key)
                     break
-            input_file = open("archives.txt", "w")
-            for key, value in dictionary.items():
-                target = "{}*{}\n".format(key,value)
-                input_file.write(str(target))
-            message.reply("تم حذف الرد")
+            open_data = open("archives.json", "w")
+            json.dump(lines, open_data, indent=2)
+            # close file
+            open_data.close()
+            message.reply("✔️ تم حذف الرد")
         else:
             message.reply("Not Found")
     else:
@@ -231,12 +227,7 @@ def profile_form(self, message):
                   "Major\n"
                   "Year\n"
                   "###########\n"
-                  "\nYou have to replace each one by your information\nLike this:\n"
-                  "\n########\n"
-                  "/profile\n"
-                  "Abdulmohseen\n"
-                  "SWE\n"
-                  "2020\n")
+                  "\nYou have to replace each one by your information")
 
 
 # define a function that give the form to add a new response
@@ -282,7 +273,8 @@ def block(self, message):
         except:
             message.reply("You must mention someone-kick")
     else:
-        message.reply("Just the boss can kick")
+        message.reply("🚫 Just the Boss can kick")
+
 
 
 # make a function that will add a new boss in bot
@@ -290,23 +282,15 @@ def make_boss(self, message):
     if message.from_user.id == BOSS_ID_1:
         try:
             # try to take the new boss id
-            new_boss = message['reply_to_message']['from_user']['id']
-
-            # open the file and read the info
-            input_file = open("Boss.txt", "r")
-            boss_id = input_file.readlines()
-            input_file.close()
-            check = True
-            # check if the is of the user is existing or not
-            for id_file in boss_id:
-                id_file = id_file.rstrip("\n")
-                if int(new_boss) == int(id_file):
-                    check = False
-            if check:
-                output_file = open("Boss.txt", "a")
-                target = "{}\n".format(new_boss)
-                output_file.write(target)
-                output_file.close()
+            new_boss_id = message['reply_to_message']['from_user']['id']
+            new_boss_username = message['reply_to_message']['from_user']['username']
+            check = check_boss(new_boss_id)
+            if not check:
+                new_data: dict = read_json_file("Boss.json")
+                new_data[new_boss_id] = new_boss_username
+                open_data = open("Boss.json", "w")
+                json.dump(new_data, open_data, indent=2)
+                open_data.close()
                 if message['reply_to_message']['from_user']['username'] is not None:
                     message.reply("New boss has been added @{}".format(message['reply_to_message']['from_user']['username']))
                 else:
@@ -318,7 +302,7 @@ def make_boss(self, message):
         except TypeError:
             message.reply("You mush mention someone-Boss")
     else:
-        message.reply("Just Big Boss can do it")
+        message.reply("🚫 Just Big Boss can do it")
 
 
 # this function for all other messages
@@ -341,7 +325,8 @@ def global_handler(self, message):
 
         # make a profile
         elif text.split("\n")[0] == "ملف تعريفي":
-            profile(self, message)
+            #profile(self, message)
+            message.reply("نأسف تم تعطيل هذه الخاصية")
 
         # get a profile for someone
         elif text.split("\n")[0] == "معلومات":
@@ -383,6 +368,7 @@ def global_handler(self, message):
         elif text == "عيب":
             edit_bot_message(self, message)
 
+
         else:
             response = responses.sample_responses(text)
             if response is None:
@@ -397,30 +383,35 @@ def global_handler(self, message):
 def check_archives(message):
     dictionary = {}
     # open the file
-    input_file = open("archives.txt", "r")
     # read info
-    lines = input_file.readlines()
-    input_file.close()
-    for line in lines:
-        line = line.split("*")
-        dictionary[line[0]] = line[1].rstrip("\n")
+    input_file = read_json_file("archives.json")
     # check if the key is existing
-    for key, value in dictionary.items():
+    for key, value in input_file.items():
         if key.lower() == message.lower():
             # if it is existing make check to false
             return True
 
+    return False
+
 
 def check_boss(user_id):
-    input_file = open("Boss.txt", "r")
-    boss_id = input_file.readlines()
-    input_file.close()
+    boss_id = read_json_file("Boss.json")
     # check if the is of the user is existing or not
-    for id_file in boss_id:
-        id_file = id_file.rstrip("\n")
+    for id_file in boss_id.keys():
         if int(user_id) == int(id_file):
             return True
+    return False
 
+
+def read_json_file(filename):
+    if not os.path.isfile(filename):
+        o = open(filename, "x")
+        o.write("{}")
+        o.close()
+    open_data = open(filename, "r")
+    data: dict = json.load(open_data)
+    open_data.close()
+    return data
 
 
 

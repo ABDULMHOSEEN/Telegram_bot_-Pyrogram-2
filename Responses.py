@@ -2,7 +2,18 @@
 from datetime import datetime
 from urllib import request
 import json
+import os
 import profile as personal_info
+
+def read_json_file(filename):
+    if not os.path.isfile(filename):
+        o = open(filename, "x")
+        o.write("{}")
+        o.close()
+    open_data = open(filename, "r")
+    data: dict = json.load(open_data)
+    open_data.close()
+    return data
 
 
 ### ---------------------------------------------------
@@ -78,18 +89,11 @@ def sample_responses(input_text):
         dictionary = {}
         target = None
         # open the file
-        input_file = open("archives.txt", "r")
         # read info
-        lines = input_file.readlines()
-        input_file.close()
-        for line in lines:
-            line = line.split("*")
-            if len(line) == 2:
-                dictionary[line[0]] = line[1].rstrip("\n")
-                if user_message == line[0].lower():
-                    target = line[0]
-        if target is not None:
-            return dictionary[target]
+        lines = read_json_file("archives.json")
+        for key, value in lines.items():
+            if user_message == key.lower():
+                return value
         else:
             return None
 
